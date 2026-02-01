@@ -5,8 +5,10 @@ import {
   BackgroundVariant,
   Node,
   Edge,
+  MiniMap,
 } from "@xyflow/react";
 import { Boxes, MousePointer2 } from "lucide-react";
+import { useTheme } from "next-themes";
 
 type Props = {
   nodes: Node[];
@@ -15,6 +17,7 @@ type Props = {
 
 export default function ArchitectureCanvas({ nodes, edges }: Props) {
   const isEmpty = nodes.length === 0;
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className="flex flex-col h-full panel">
@@ -44,7 +47,9 @@ export default function ArchitectureCanvas({ nodes, edges }: Props) {
           proOptions={{ hideAttribution: true }}
         >
           <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
-          <Controls />
+          <Controls className="text-black bg-amber-400" />
+
+          <MiniMap color={theme === "dark" ? "grey-300" : "white"} />
         </ReactFlow>
 
         {/* Empty State */}
