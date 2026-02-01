@@ -1,0 +1,8 @@
+export default function SignInPage(){
+    return(
+        <div>
+            <input type="text" placeholder="Enter username" />
+            <input type="password" placeholder="Enter Password" />
+        </div>
+    );
+};
