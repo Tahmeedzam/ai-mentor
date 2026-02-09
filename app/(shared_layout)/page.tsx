@@ -5,6 +5,8 @@ import ArchitectureCanvas from "@/components/chat/flow_canva";
 import { overviewFlow, roadmapFlow } from "@/data/dummyFlows";
 import { Node, Edge } from "@xyflow/react";
 import ChatPanelNew from "@/components/chat/chat_panel_new";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -60,6 +62,15 @@ export default function Home() {
       {/* Center content */}
       <div className="flex h-full w-full items-center justify-center">
         <ChatPanelNew onSend={handleSend} />
+      </div>
+
+      <div className="absolute top-6 right-6">
+        <Link
+          href="/auth/signin"
+          className="text-sm text-gray-300 hover:text-white"
+        >
+          <Button variant="outline">Sign in</Button>
+        </Link>
       </div>
     </div>
   );

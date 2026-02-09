@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-row `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-row`}
       >
         <ThemeProvider attribute="class" enableSystem defaultTheme="dark">
           <NavigationBar />

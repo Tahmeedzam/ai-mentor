@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import "@/app/(shared_layout)/globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,9 +24,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <title>Login</title>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+        />
+        <link
+          href="https://db.onlinewebfonts.com/c/4a24899e94d8236f671c1090cd9e068c?family=Canela-Regular"
+          rel="stylesheet"
+          type="text/css"
+        />
+        <style>{`
+          h1 {
+     
+         font-family: 'Canela-Regular', serif;
+          }
+        `}</style>
+      </head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#121212]`}
+      >
+        <ThemeProvider attribute="class" enableSystem defaultTheme="dark">
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
