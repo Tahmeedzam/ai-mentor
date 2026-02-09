@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import NavigationBar from "@/components/web/chat_sidebar";
+import FooterBar from "@/components/web/footer";
+import "@xyflow/react/dist/style.css";
 import "./globals.css";
-import NavigationBar from "@/components/web/navbar";
-import DashboardPage from "./page";
+import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,10 +27,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NavigationBar/>
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-row`}
+      >
+        <ThemeProvider attribute="class" enableSystem defaultTheme="dark">
+          <NavigationBar />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

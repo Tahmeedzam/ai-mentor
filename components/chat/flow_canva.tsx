@@ -1,8 +1,24 @@
-import { ReactFlow, Background, Controls, BackgroundVariant } from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  BackgroundVariant,
+  Node,
+  Edge,
+  MiniMap,
+} from "@xyflow/react";
 import { Boxes, MousePointer2 } from "lucide-react";
+import { useTheme } from "next-themes";
 
-export default function ArchitectureCanvas() {
+type Props = {
+  nodes: Node[];
+  edges: Edge[];
+};
+
+export default function ArchitectureCanvas({ nodes, edges }: Props) {
+  const isEmpty = nodes.length === 0;
+  const { theme, setTheme } = useTheme();
+
   return (
     <div className="flex flex-col h-full panel">
       {/* Header */}
@@ -13,7 +29,7 @@ export default function ArchitectureCanvas() {
           </div>
           <div>
             <h2 className="panel-title">Project Architecture / Flow</h2>
-            <p className="panel-subtitle">Click on any block to explore details in chat</p>
+            <p className="panel-subtitle">Generated based on chat input</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full">
@@ -22,39 +38,32 @@ export default function ArchitectureCanvas() {
         </div>
       </div>
 
-      {/* Canvas Area */}
+      {/* Canvas */}
       <div className="flex-1 relative bg-canvas-bg">
         <ReactFlow
-          nodes={[]}
-          edges={[]}
+          nodes={nodes}
+          edges={edges}
           fitView
           proOptions={{ hideAttribution: true }}
         >
-          <Background 
-            variant={BackgroundVariant.Dots} 
-            gap={20} 
-            size={1}
-            className="bg-canvas-bg!"
-            color="hsl(var(--canvas-grid))"
-          />
-          <Controls 
-            className="bg-surface! border-border! rounded-lg! shadow-sm! [&>button]:bg-surface! [&>button]:border-border! [&>button]:text-foreground! [&>button:hover]:bg-surface-hover!"
-          />
+          <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
+          <Controls className="text-black bg-amber-400" />
+
+          <MiniMap color={theme === "dark" ? "grey-300" : "white"} />
         </ReactFlow>
 
-        {/* Empty State Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="text-center">
-            <div className="w-20 h-20 rounded-2xl bg-surface border border-border shadow-sm flex items-center justify-center mx-auto mb-4">
-              <Boxes className="w-10 h-10 text-muted-foreground/40" />
+        {/* Empty State */}
+        {isEmpty && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-center">
+              <Boxes className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-muted-foreground">
+                Describe your project to generate flow
+              </p>
             </div>
-            <p className="text-muted-foreground font-medium">Architecture will be generated here</p>
-            <p className="text-muted-foreground/60 text-sm mt-1">
-              Describe your project in the chat to get started
-            </p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
-};
+}
