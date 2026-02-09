@@ -4,8 +4,14 @@ import { useState } from "react";
 import { Node, Edge } from "@xyflow/react";
 import ChatPanelNew from "@/components/chat/chat_panel_new";
 import { Playfair_Display } from "next/font/google";
+<<<<<<< HEAD
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+=======
+>>>>>>> 527261beb4fc565bed8e39e574dd6c92cff1b7e5
+
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const PlayfairDisplay600 = Playfair_Display({
   subsets: ["latin"],

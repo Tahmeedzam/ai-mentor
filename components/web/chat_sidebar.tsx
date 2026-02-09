@@ -48,7 +48,7 @@ export default function NavigationBar() {
       >
         {/* Toggle + Heading */}
         <div
-          className={`flex items-center ${isOpen ? "" : "items-center"}  gap-3`}
+          className={`flex items-center justify-between${isOpen ? "justify-between" : "items-center"}  gap-3`}
         >
           {isOpen && (
             <span
@@ -57,11 +57,13 @@ export default function NavigationBar() {
               KAIROS
             </span>
           )}
-          <FiSidebar
-            className={`text-[#A1A1AA] hover:text-black dark:hover:text-white transition-colors cursor-pointer`}
-            size={20}
-            onClick={toggleSidebar}
-          />
+          <div>
+            <FiSidebar
+              className={`text-[#A1A1AA] hover:text-black dark:hover:text-white transition-colors cursor-pointer`}
+              size={20}
+              onClick={toggleSidebar}
+            />
+          </div>
           <span className="absolute left-8 top-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 whitespace-nowrap rounded-md bg-black text-white text-xs px-2 py-1 transition-transform">
             Toggle Sidebar
           </span>
