@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NavigationBar from "@/components/web/chat_sidebar";
 import FooterBar from "@/components/web/footer";
-import "@xyflow/react/dist/style.css";
-import "./globals.css";
 import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
