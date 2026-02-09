@@ -1,12 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import ArchitectureCanvas from "@/components/chat/flow_canva";
-import { overviewFlow, roadmapFlow } from "@/data/dummyFlows";
 import { Node, Edge } from "@xyflow/react";
 import ChatPanelNew from "@/components/chat/chat_panel_new";
+<<<<<<< HEAD
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+=======
+import { Playfair_Display } from "next/font/google";
+
+const PlayfairDisplay600 = Playfair_Display({
+  subsets: ["latin"],
+  weight: "600",
+});
+const PlayfairDisplay400 = Playfair_Display({
+  subsets: ["cyrillic"],
+  weight: "400",
+});
+>>>>>>> fab705cf48c9a24b78f9e45dc5ce614dbe4414da
 
 export default function Home() {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -56,7 +67,9 @@ export default function Home() {
     <div className="h-screen w-screen bg-[#121212] text-white relative">
       {/* Top-left heading */}
       <div className="absolute top-6 left-6">
-        <h1 className="text-lg font-semibold">MentorFlow</h1>
+        <h1 className={`text-lg font-semibold ${PlayfairDisplay600.className}`}>
+          KAIROS
+        </h1>
       </div>
 
       {/* Center content */}

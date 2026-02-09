@@ -10,6 +10,7 @@ import { useTheme } from "next-themes";
 
 export default function NavigationBar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const toggleSidebar = () => {
     setIsOpen((prev) => !prev);
   };
@@ -45,7 +46,7 @@ export default function NavigationBar() {
             </span>
           )}
           <FiSidebar
-            className={`text-[#A1A1AA] hover:text-black dark:hover:text-white transition-colors cursor-pointer `}
+            className={`text-[#A1A1AA] hover:text-black dark:hover:text-white transition-colors cursor-pointer`}
             size={20}
             onClick={toggleSidebar}
           />
@@ -58,7 +59,7 @@ export default function NavigationBar() {
         <div className="flex items-center gap-3 cursor-pointer">
           <div className="rounded-full w-8 h-8 bg-black" />
           {isOpen && (
-            <span className="text-sm text-black dark:text-white transition-opacity duration-200 opacity-100">
+            <span className="text-sm text-black dark:text-white transition-opacity duration-200 opacity-100 ">
               Dashboard
             </span>
           )}
