@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { Node, Edge } from "@xyflow/react";
 import ChatPanelNew from "@/components/chat/chat_panel_new";
-<<<<<<< HEAD
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-=======
 import { Playfair_Display } from "next/font/google";
+
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const PlayfairDisplay600 = Playfair_Display({
   subsets: ["latin"],
@@ -17,7 +16,6 @@ const PlayfairDisplay400 = Playfair_Display({
   subsets: ["cyrillic"],
   weight: "400",
 });
->>>>>>> fab705cf48c9a24b78f9e45dc5ce614dbe4414da
 
 export default function Home() {
   const [nodes, setNodes] = useState<Node[]>([]);
