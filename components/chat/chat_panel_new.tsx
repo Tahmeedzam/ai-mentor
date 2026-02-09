@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { Send } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Playfair_Display } from "next/font/google";
+import { Playfair_Display, Libre_Baskerville } from "next/font/google";
 import { useTheme } from "next-themes";
 
 const PlayfairDisplay600 = Playfair_Display({
@@ -15,6 +15,11 @@ const PlayfairDisplay600 = Playfair_Display({
 const PlayfairDisplay400 = Playfair_Display({
   subsets: ["cyrillic"],
   weight: "400",
+});
+
+const LibreBaskerville = Libre_Baskerville({
+  subsets: ["latin"],
+  weight: "500",
 });
 
 export default function ChatPanelNew({
@@ -30,7 +35,7 @@ export default function ChatPanelNew({
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-2xl px-4">
       <h2
-        className={`text-4xl font-semibold text-center ${PlayfairDisplay600.className}`}
+        className={`text-4xl font-semibold text-center ${LibreBaskerville.className}`}
       >
         What are you creating today?
       </h2>

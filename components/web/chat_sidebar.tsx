@@ -7,6 +7,16 @@ import ThemeToggle from "./theme-toggle";
 import { useState } from "react";
 import { FiSidebar } from "react-icons/fi";
 import { useTheme } from "next-themes";
+import { Playfair_Display } from "next/font/google";
+
+const PlayfairDisplay600 = Playfair_Display({
+  subsets: ["latin"],
+  weight: "600",
+});
+const PlayfairDisplay400 = Playfair_Display({
+  subsets: ["cyrillic"],
+  weight: "400",
+});
 
 export default function NavigationBar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,11 +48,13 @@ export default function NavigationBar() {
       >
         {/* Toggle + Heading */}
         <div
-          className={`flex items-center ${isOpen ? "items-end" : "items-center"}  gap-3`}
+          className={`flex items-center ${isOpen ? "" : "items-center"}  gap-3`}
         >
           {isOpen && (
-            <span className="text-sm font-semibold text-black dark:text-white">
-              MentorFlow
+            <span
+              className={`text-md font-semibold text-black dark:text-white ${PlayfairDisplay400.className}`}
+            >
+              KAIROS
             </span>
           )}
           <FiSidebar
@@ -59,7 +71,9 @@ export default function NavigationBar() {
         <div className="flex items-center gap-3 cursor-pointer">
           <div className="rounded-full w-8 h-8 bg-black" />
           {isOpen && (
-            <span className="text-sm text-black dark:text-white transition-opacity duration-200 opacity-100 ">
+            <span
+              className={`text-sm text-black dark:text-white transition-opacity duration-200 opacity-100 ${PlayfairDisplay400.className}`}
+            >
               Dashboard
             </span>
           )}
@@ -75,8 +89,11 @@ export default function NavigationBar() {
         <div className="flex items-center gap-3 cursor-pointer">
           <ThemeToggle />
           {isOpen && (
-            <p className=" text-black dark:text-white transition-opacity duration-200 opacity-100">
-              Theme : {theme?.toString().toUpperCase()}
+            <p
+              className={` text-black dark:text-white transition-opacity duration-200 opacity-100 text-sm ${PlayfairDisplay400.className}`}
+            >
+              Theme: {theme?.toString().charAt(0).toUpperCase()}
+              {theme?.toString().slice(1).toLowerCase()}
             </p>
           )}
         </div>

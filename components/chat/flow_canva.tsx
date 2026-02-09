@@ -1,23 +1,56 @@
+"use client";
+
 import {
   ReactFlow,
   Background,
   Controls,
   BackgroundVariant,
+  MiniMap,
   Node,
   Edge,
-  MiniMap,
 } from "@xyflow/react";
 import { Boxes, MousePointer2 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useState } from "react";
+import type { FlowResponse } from "@/lib/flow/flowSchema";
+import StepNode from "@/components/flow/stepNode";
 
-type Props = {
-  nodes: Node[];
-  edges: Edge[];
-};
+export default function ArchitectureCanvas() {
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
+  const { theme } = useTheme();
 
-export default function ArchitectureCanvas({ nodes, edges }: Props) {
   const isEmpty = nodes.length === 0;
-  const { theme, setTheme } = useTheme();
+
+  // ✅ MOVE THIS HERE
+  const handleAIResponse = (data: FlowResponse) => {
+    const newNodes: Node[] = data.steps.map((step, index) => ({
+      id: step.id,
+      type: "default",
+      data: { label: step.label },
+      position: {
+        x: index * 250,
+        y: 0,
+      },
+    }));
+
+    const newEdges: Edge[] = data.connections.map((conn) => ({
+      id: `e-${conn.from}-${conn.to}`,
+      source: conn.from,
+      target: conn.to,
+      animated: true,
+    }));
+
+    setNodes(newNodes);
+    setEdges(newEdges);
+  };
+
+  const nodeTypes = {
+    step: StepNode,
+  };
+
+  // 👇 expose this to parent
+  (globalThis as any).__FLOW_HANDLE__ = handleAIResponse;
 
   return (
     <div className="flex flex-col h-full panel">
@@ -44,15 +77,20 @@ export default function ArchitectureCanvas({ nodes, edges }: Props) {
           nodes={nodes}
           edges={edges}
           fitView
-          proOptions={{ hideAttribution: true }}
+          nodeTypes={nodeTypes}
+          className="text-black"
         >
-          <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
-          <Controls className="text-black bg-amber-400" />
+          <Background
+            variant={BackgroundVariant.Dots}
+            gap={20}
+            size={1}
+            bgColor={theme === "dark" ? "#202020" : "#F9FAFF"}
+          />
+          <Controls className="text-black" />
 
-          <MiniMap color={theme === "dark" ? "grey-300" : "white"} />
+          <MiniMap />
         </ReactFlow>
 
-        {/* Empty State */}
         {isEmpty && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center">

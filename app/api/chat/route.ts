@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { validateFlowJSON } from "@/lib/flow/flowSchema";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -54,12 +55,11 @@ ${message}
     );
   }
 
-  let parsed;
-  try {
-    parsed = JSON.parse(jsonText);
-  } catch {
+  const parsed = JSON.parse(jsonText);
+
+  if (!validateFlowJSON(parsed)) {
     return NextResponse.json(
-      { error: "Bad JSON", raw: rawText },
+      { error: "Invalid flow schema", raw: parsed },
       { status: 400 },
     );
   }
