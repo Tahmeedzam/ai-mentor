@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { Node, Edge } from "@xyflow/react";
 import ChatPanelNew from "@/components/chat/chat_panel_new";
+<<<<<<< HEAD
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+=======
 import { Playfair_Display } from "next/font/google";
 
 const PlayfairDisplay600 = Playfair_Display({
@@ -13,6 +17,7 @@ const PlayfairDisplay400 = Playfair_Display({
   subsets: ["cyrillic"],
   weight: "400",
 });
+>>>>>>> fab705cf48c9a24b78f9e45dc5ce614dbe4414da
 
 export default function Home() {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -70,6 +75,15 @@ export default function Home() {
       {/* Center content */}
       <div className="flex h-full w-full items-center justify-center">
         <ChatPanelNew onSend={handleSend} />
+      </div>
+
+      <div className="absolute top-6 right-6">
+        <Link
+          href="/auth/signin"
+          className="text-sm text-gray-300 hover:text-white"
+        >
+          <Button variant="outline">Sign in</Button>
+        </Link>
       </div>
     </div>
   );
