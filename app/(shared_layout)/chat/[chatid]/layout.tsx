@@ -23,8 +23,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -32,8 +34,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-row`}
       >
         <ThemeProvider attribute="class" enableSystem defaultTheme="dark">
-          <NavigationBar />
           {children}
+          {modal}
         </ThemeProvider>
       </body>
     </html>

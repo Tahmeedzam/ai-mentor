@@ -1,7 +1,7 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { Send } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
