@@ -28,10 +28,11 @@ export default function StepNode({ data }: { data: { label: string } }) {
         backdrop-blur-sm
         transition-all duration-200
         hover:scale-[1.03] hover:shadow-[0_15px_40px_rgba(0,0,0,0.35)]
+        
       `}
     >
       {/* Glow */}
-      <div className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 hover:opacity-100 transition" />
+      <div className="pointer-events-auto absolute inset-0 rounded-2xl bg-white/10 opacity-0 hover:opacity-100 transition" />
 
       {/* Label */}
       <div className="relative text-sm font-semibold text-center text-white">
@@ -40,14 +41,15 @@ export default function StepNode({ data }: { data: { label: string } }) {
 
       {/* Handles */}
       <Handle
-        type="target"
-        position={Position.Top}
-        className="!bg-white/80 !border-none !w-2.5 !h-2.5"
-      />
-      <Handle
         type="source"
         position={Position.Bottom}
-        className="!bg-white/80 !border-none !w-2.5 !h-2.5"
+        className="!w-3 !h-3 !bg-white !border-none"
+      />
+
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="!w-3 !h-3 !bg-white !border-none"
       />
     </div>
   );

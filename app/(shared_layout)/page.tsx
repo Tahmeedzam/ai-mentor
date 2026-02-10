@@ -77,7 +77,7 @@ export default function Home() {
 
       <div className="absolute top-6 right-6">
         <Link
-          href="/auth/signin"
+          href="/auth/sign-in"
           className="text-sm text-gray-300 hover:text-white"
         >
           <Button variant="outline">Sign in</Button>

@@ -10,6 +10,8 @@ import {
   BackgroundVariant,
   useNodesState,
   useEdgesState,
+  OnEdgesChange,
+  ConnectionMode,
 } from "@xyflow/react";
 import { Boxes, MousePointer2 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -19,6 +21,10 @@ import StepNode from "@/components/web/flow/stepNode";
 // import { overviewFlow, roadmapFlow } from "@/data/dummyFlows";
 import { useParams, useRouter } from "next/navigation";
 import { dummyNodeMap } from "@/data/dummyFlows";
+import { simpleAppFlow } from "@/lib/flow/dummy/flow.template";
+import { adaptFlowToReactFlow } from "@/lib/flow/adapters/reactflow.adapter";
+import { FlowGraph } from "@/lib/flow/types";
+import type { Connection, OnConnect } from "@xyflow/react";
 
 type StepNodeData = {
   label: string;
@@ -28,7 +34,8 @@ export default function ArchitectureCanvas() {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<StepNodeData>>(
     [],
   );
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [edges, setEdges] = useEdgesState<Edge>([]);
+  const [flowGraph, setFlowGraph] = useState<FlowGraph>(simpleAppFlow);
   // const [selectedNode, setSelectedNode] = useState<Node<StepNodeData> | null>(
   //   null,
   // );
@@ -58,6 +65,34 @@ export default function ArchitectureCanvas() {
 
     setNodes(newNodes);
     setEdges(newEdges);
+  };
+  const onEdgesChange: OnEdgesChange = (changes) => {
+    const removedEdgeIds = changes
+      .filter((c) => c.type === "remove")
+      .map((c) => c.id);
+
+    if (removedEdgeIds.length === 0) return;
+
+    setFlowGraph((prev) => ({
+      ...prev,
+      edges: prev.edges.filter((edge) => !removedEdgeIds.includes(edge.id)),
+    }));
+  };
+  const onConnect: OnConnect = (connection: Connection) => {
+    if (!connection.source || !connection.target) return;
+
+    setFlowGraph((prev) => ({
+      ...prev,
+      edges: [
+        ...prev.edges,
+        {
+          id: `e-${connection.source}-${connection.target}-${Date.now()}`,
+          source: connection.source,
+          target: connection.target,
+          type: "required", // v1 default
+        },
+      ],
+    }));
   };
 
   const handleNodeClick = (_: any, node: Node<{ label: string }>) => {
@@ -97,10 +132,10 @@ export default function ArchitectureCanvas() {
   };
 
   useEffect(() => {
-    const { nodes, edges } = buildFlowFromDummy();
+    const { nodes, edges } = adaptFlowToReactFlow(flowGraph);
     setNodes(nodes);
     setEdges(edges);
-  }, []);
+  }, [flowGraph]);
 
   (globalThis as any).__FLOW_HANDLE__ = handleAIResponse;
 
@@ -130,8 +165,6 @@ export default function ArchitectureCanvas() {
       {/* Canvas */}
       <div className="flex-1 relative min-h-0 rounded-lg overflow-hidden">
         <ReactFlow
-          // nodes={nodes}
-          // edges={edges}
           nodes={nodes}
           edges={edges}
           fitView
@@ -139,16 +172,22 @@ export default function ArchitectureCanvas() {
           className="text-black"
           nodesDraggable={true}
           nodesConnectable={false}
-          elementsSelectable={true}
           panOnDrag={true}
           zoomOnScroll={true}
           zoomOnPinch={true}
           panOnScroll={false}
           proOptions={{ hideAttribution: true }}
           onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
           onNodeClick={handleNodeClick}
           onPaneClick={() => setSelectedNodeId(null)}
+          deleteKeyCode={["Backspace", "Delete"]}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          // edgesUpdatable={true}
+          edgesFocusable={true}
+          // edgesUpdatable={false}
+          elementsSelectable
+          connectionMode={ConnectionMode.Loose}
         >
           <Background
             variant={BackgroundVariant.Dots}
