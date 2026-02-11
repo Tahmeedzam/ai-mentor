@@ -36,16 +36,11 @@ export default function ArchitectureCanvas() {
   );
   const [edges, setEdges] = useEdgesState<Edge>([]);
   const [flowGraph, setFlowGraph] = useState<FlowGraph>(simpleAppFlow);
-  // const [selectedNode, setSelectedNode] = useState<Node<StepNodeData> | null>(
-  //   null,
-  // );
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-
   const { chatid } = useParams<{ chatid: string }>();
   const { theme } = useTheme();
   const isEmpty = nodes.length === 0;
   const router = useRouter();
-
   const selectedNode = selectedNodeId ? dummyNodeMap[selectedNodeId] : null;
 
   const handleAIResponse = (data: FlowResponse) => {
@@ -66,6 +61,7 @@ export default function ArchitectureCanvas() {
     setNodes(newNodes);
     setEdges(newEdges);
   };
+
   const onEdgesChange: OnEdgesChange = (changes) => {
     const removedEdgeIds = changes
       .filter((c) => c.type === "remove")
@@ -78,6 +74,7 @@ export default function ArchitectureCanvas() {
       edges: prev.edges.filter((edge) => !removedEdgeIds.includes(edge.id)),
     }));
   };
+
   const onConnect: OnConnect = (connection: Connection) => {
     if (!connection.source || !connection.target) return;
 
@@ -95,10 +92,6 @@ export default function ArchitectureCanvas() {
     }));
   };
 
-  const handleNodeClick = (_: any, node: Node<{ label: string }>) => {
-    setSelectedNodeId(node.id);
-  };
-
   // Only for dummy data
   const buildFlowFromDummy = (): {
     nodes: Node<{ label: string }>[];
@@ -106,12 +99,10 @@ export default function ArchitectureCanvas() {
   } => {
     const nodes: Node<{ label: string }>[] = [];
     const edges: Edge[] = [];
-
     const order = ["user", "frontend", "ai"]; // 👈 layout order
 
     order.forEach((id, index) => {
       const node = dummyNodeMap[id];
-
       nodes.push({
         id: node.id,
         type: "step",
@@ -129,6 +120,10 @@ export default function ArchitectureCanvas() {
     });
 
     return { nodes, edges };
+  };
+
+  const handleNodeClick = (_: any, node: Node<{ label: string }>) => {
+    setSelectedNodeId(node.id);
   };
 
   useEffect(() => {
@@ -168,7 +163,6 @@ export default function ArchitectureCanvas() {
           nodes={nodes}
           edges={edges}
           fitView
-          nodeTypes={{ step: StepNode }}
           className="text-black"
           nodesDraggable={true}
           nodesConnectable={false}
@@ -176,17 +170,16 @@ export default function ArchitectureCanvas() {
           zoomOnScroll={true}
           zoomOnPinch={true}
           panOnScroll={false}
+          edgesFocusable={true}
+          elementsSelectable
           proOptions={{ hideAttribution: true }}
+          nodeTypes={{ step: StepNode }}
           onNodesChange={onNodesChange}
           onNodeClick={handleNodeClick}
           onPaneClick={() => setSelectedNodeId(null)}
           deleteKeyCode={["Backspace", "Delete"]}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          // edgesUpdatable={true}
-          edgesFocusable={true}
-          // edgesUpdatable={false}
-          elementsSelectable
           connectionMode={ConnectionMode.Loose}
         >
           <Background
@@ -199,6 +192,7 @@ export default function ArchitectureCanvas() {
           {/* <MiniMap /> */}
         </ReactFlow>
 
+        {/* each Node sidebar */}
         {selectedNode && (
           <div className="absolute top-0 right-0 h-full w-80 bg-[#121212] border-l border-white/10 z-20">
             <div className="p-4 flex items-center justify-between border-b border-white/10">
