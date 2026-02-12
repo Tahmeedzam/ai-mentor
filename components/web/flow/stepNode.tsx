@@ -1,61 +1,110 @@
-import { NodeStatus } from "@/lib/flow/schema/node.schema";
+import { FlowGraph } from "@/lib/flow/types";
 import { Handle, Position } from "@xyflow/react";
-import { useMemo } from "react";
+import type { Node as RFNode, NodeProps as RFNodeProps } from "@xyflow/react";
+import { MoveRight, Zap } from "lucide-react";
 
-const GRADIENTS = [
-  "from-violet-600 to-indigo-600",
-  "from-fuchsia-600 to-purple-600",
-  "from-sky-500 to-cyan-500",
-  "from-emerald-500 to-teal-500",
-];
+type StepNodeData = FlowGraph["nodes"][number];
 
-export interface NodeData {
-  label: string;
-  status: NodeStatus;
-}
-
-export default function StepNode({ data }: { data: NodeData }) {
-  // Pick a gradient ONCE per node (stable)
-  const gradient = useMemo(() => {
-    const hash = Array.from(data.label).reduce(
-      (acc, char) => acc + char.charCodeAt(0),
-      0,
-    );
-    return GRADIENTS[hash % GRADIENTS.length];
-  }, [data.label]);
+export default function StepNode({
+  data,
+  selected,
+}: RFNodeProps<RFNode<StepNodeData>>) {
+  const isError = data.status === "error";
+  const isWarning = data.status === "warning";
 
   return (
-    <div
-      className={`
-        relative rounded-2xl px-4 py-3 min-w-[180px]
-        bg-gradient-to-br ${gradient}
-      ${data.status === "error" ? "border-2 border-red-400" : "border border-white/10"}
-        shadow-[0_10px_30px_rgba(0,0,0,0.25)]
-        backdrop-blur-sm
-        transition-all duration-200
-        hover:scale-[1.03] hover:shadow-[0_15px_40px_rgba(0,0,0,0.35)]
-        
-      `}
-    >
+    <div className="group relative cursor-grab active:cursor-grabbing">
       {/* Glow */}
-      <div className="pointer-events-auto absolute inset-0 rounded-2xl bg-white/10 opacity-0 hover:opacity-100 transition" />
+      <div
+        className={`absolute -inset-4 rounded-[2rem] blur-3xl transition-all duration-1000 pointer-events-none ${
+          isError
+            ? "bg-red-500/20"
+            : isWarning
+              ? "bg-yellow-500/20"
+              : "bg-transparent"
+        }`}
+      />
 
-      {/* Label */}
-      <div className="relative text-sm font-semibold text-center text-white">
-        {data.label}
+      {/* MAIN CARD */}
+      <div
+        className={`
+          relative min-w-64 bg-[#050506]
+          border rounded-xl overflow-hidden
+          transition-all duration-300
+          ${
+            isError
+              ? "border-red-500"
+              : isWarning
+                ? "border-yellow-400"
+                : "border-white/10"
+          }
+          ${selected ? "ring-2 ring-primary" : ""}
+        `}
+      >
+        {/* Shimmer */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.05] to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
+        </div>
+
+        <div className="p-4 relative z-10">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Zap size={10} />
+              <span className="text-[9px] font-mono text-white/20 tracking-[0.2em] uppercase font-bold">
+                MTX:
+              </span>
+            </div>
+          </div>
+
+          <h3 className="text-[14px] font-black text-white mb-1 tracking-tight">
+            {data.title}
+          </h3>
+
+          <p className="text-[11px] text-white/40 leading-relaxed mb-4 line-clamp-2 font-medium">
+            {data.description}
+          </p>
+
+          {/* Status indicator */}
+          {data.status !== "ok" && (
+            <div className="absolute top-2 right-2">
+              <div
+                className={`h-2 w-2 rounded-full ${
+                  isError ? "bg-red-500" : "bg-yellow-400"
+                }`}
+              />
+            </div>
+          )}
+
+          {/* Bottom Section */}
+          <div className="flex items-center justify-between pt-3 border-t border-white/5">
+            <div className="text-[10px] text-white/30">
+              Requires: {data.requires.length}
+            </div>
+
+            <div className="group/btn flex items-center gap-2 text-[10px] font-black tracking-widest cursor-pointer transition-all active:scale-95">
+              <span className="opacity-40 group-hover/btn:opacity-100 transition-opacity uppercase">
+                Logic
+              </span>
+              <MoveRight
+                size={14}
+                className="group-hover/btn:translate-x-1 transition-transform duration-300"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Handles */}
+        <Handle
+          type="target"
+          position={Position.Left}
+          className="!w-12 !h-[2px] !border-none !rounded-none !bg-white/20 hover:!bg-white/50 transition-colors"
+        />
+        <Handle
+          type="source"
+          position={Position.Right}
+          className="!w-12 !h-[2px] !border-none !rounded-none !bg-white/20 hover:!bg-white/50 transition-colors"
+        />
       </div>
-
-      {/* Handles */}
-      <Handle
-        type="target"
-        position={Position.Top}
-        className="!w-3 !h-3 !bg-white !border-none"
-      />
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className="!w-3 !h-3 !bg-white !border-none"
-      />
     </div>
   );
 }

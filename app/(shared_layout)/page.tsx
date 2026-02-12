@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { validateFlow } from "@/lib/flow/validation/validateFlow";
 import { simpleAppFlow } from "@/lib/flow/dummy/flow.template";
-import { getFlowIssues } from "@/lib/flow/validation/getFlowIssue";
 
 const PlayfairDisplay600 = Playfair_Display({
   subsets: ["latin"],
@@ -20,9 +19,10 @@ const PlayfairDisplay400 = Playfair_Display({
   weight: "400",
 });
 
-const validated = validateFlow(simpleAppFlow);
+// Checking data validation
+// const validated = validateFlow(simpleAppFlow);
+// const flowIssues = getFlowIssues(validated);
 // console.log(validated.nodes);
-const flowIssues = getFlowIssues(validated);
 // console.log(flowIssues);
 
 export default function Home() {

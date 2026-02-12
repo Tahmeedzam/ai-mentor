@@ -5,14 +5,16 @@ import {
   Background,
   Controls,
   MiniMap,
-  Node,
-  Edge,
   BackgroundVariant,
   useNodesState,
   useEdgesState,
   OnEdgesChange,
   ConnectionMode,
+  OnNodesChange,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from "@xyflow/react";
+import type { Node, Edge } from "@xyflow/react";
 import { Boxes, MousePointer2, Plus } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -25,33 +27,34 @@ import { simpleAppFlow } from "@/lib/flow/dummy/flow.template";
 import { adaptFlowToReactFlow } from "@/lib/flow/adapters/reactflow.adapter";
 import { FlowGraph } from "@/lib/flow/types";
 import type { Connection, OnConnect } from "@xyflow/react";
-import { Button } from "@/components/ui/button";
+import FlowCardBar from "../flow/flowCardBar";
 import { validateFlow } from "@/lib/flow/validation/validateFlow";
-import { getFlowIssues } from "@/lib/flow/validation/getFlowIssue";
+import { Button } from "@/components/ui/button";
+import { FlowNode } from "@/lib/flow/schema/node.schema";
 
-type StepNodeData = {
-  label: string;
-};
+type StepNodeData = FlowGraph["nodes"][number];
 
 export default function ArchitectureCanvas() {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<StepNodeData>>(
-    [],
-  );
-  const [edges, setEdges] = useEdgesState<Edge>([]);
   const [flowGraph, setFlowGraph] = useState<FlowGraph>(simpleAppFlow);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const { chatid } = useParams<{ chatid: string }>();
   const { theme } = useTheme();
+  // const validatedFlow = validateFlow(flowGraph);
+  // const flowIssues = getFlowIssues(validatedFlow);
+  const { nodes: adaptedNodes, edges: adaptedEdges } =
+    adaptFlowToReactFlow(flowGraph);
+
+  const [nodes, setNodes, rfOnNodesChange] = useNodesState(adaptedNodes);
+  const [edges, setEdges, rfOnEdgesChange] = useEdgesState(adaptedEdges);
+
   const isEmpty = nodes.length === 0;
-  const router = useRouter();
   const selectedNode = selectedNodeId ? dummyNodeMap[selectedNodeId] : null;
-  const validated = validateFlow(simpleAppFlow);
-  // console.log(validated.nodes);
-  const flowIssues = getFlowIssues(validated);
-  // console.log(flowIssues);
 
   const handleAIResponse = (data: FlowResponse) => {
-    const newNodes: Node<StepNodeData>[] = data.steps.map((step, index) => ({
+    // AI responses contain a simplified `FlowStep` shape (id + label).
+    // Keep this mapping flexible by using `Node<any>[]` so it doesn't
+    // conflict with our full `StepNodeData` (FlowNode) type.
+    const newNodes: Node<any>[] = data.steps.map((step, index) => ({
       id: step.id,
       type: "step",
       data: { label: step.label },
@@ -65,79 +68,77 @@ export default function ArchitectureCanvas() {
       animated: true,
     }));
 
-    setNodes(newNodes);
-    setEdges(newEdges);
+    // setNodes(newNodes);
+    // setEdges(newEdges);
+  };
+
+  // Handle node changes (position, removal) via React Flow helpers
+  const onNodesChange: OnNodesChange = (changes) => {
+    setNodes((nds) => {
+      const updated = applyNodeChanges(changes, nds) as Node<FlowNode>[];
+
+      // sync back to flowGraph: take each RF node's `data` (the full FlowNode)
+      // and update its `position` from the RF node
+      setFlowGraph((prev) => ({
+        ...prev,
+        nodes: updated.map((n) => ({
+          ...(n.data as any),
+          position: n.position,
+        })),
+      }));
+
+      return updated;
+    });
   };
 
   const onEdgesChange: OnEdgesChange = (changes) => {
-    const removedEdgeIds = changes
-      .filter((c) => c.type === "remove")
-      .map((c) => c.id);
+    setEdges((eds) => {
+      const updated = applyEdgeChanges(changes, eds);
 
-    if (removedEdgeIds.length === 0) return;
+      setFlowGraph((prev) => ({
+        ...prev,
+        edges: updated.map((e) => ({
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          type: (e as any).type || "required",
+        })),
+      }));
 
-    setFlowGraph((prev) => ({
-      ...prev,
-      edges: prev.edges.filter((edge) => !removedEdgeIds.includes(edge.id)),
-    }));
+      return updated;
+    });
   };
 
   const onConnect: OnConnect = (connection: Connection) => {
     if (!connection.source || !connection.target) return;
+
+    const newEdge: Edge = {
+      id: `e-${connection.source}-${connection.target}-${Date.now()}`,
+      source: connection.source,
+      target: connection.target,
+    };
+
+    setEdges((eds) => [...eds, newEdge]);
 
     setFlowGraph((prev) => ({
       ...prev,
       edges: [
         ...prev.edges,
         {
-          id: `e-${connection.source}-${connection.target}-${Date.now()}`,
-          source: connection.source,
-          target: connection.target,
-          type: "required", // v1 default
+          id: newEdge.id,
+          source: newEdge.source,
+          target: newEdge.target,
+          type: "required",
         },
       ],
     }));
   };
 
-  // Only for dummy data
-  // const buildFlowFromDummy = (): {
-  //   nodes: Node<{ label: string }>[];
-  //   edges: Edge[];
-  // } => {
-  //   const nodes: Node<{ label: string }>[] = [];
-  //   const edges: Edge[] = [];
-  //   const order = ["user", "frontend", "ai"]; // 👈 layout order
-
-  //   order.forEach((id, index) => {
-  //     const node = dummyNodeMap[id];
-  //     nodes.push({
-  //       id: node.id,
-  //       type: "step",
-  //       data: { label: node.label },
-  //       position: { x: index * 250, y: 100 },
-  //     });
-
-  //     if (index > 0) {
-  //       edges.push({
-  //         id: `e-${order[index - 1]}-${id}`,
-  //         source: order[index - 1],
-  //         target: id,
-  //       });
-  //     }
-  //   });
-
-  //   return { nodes, edges };
-  // };
-
-  const handleNodeClick = (_: any, node: Node<{ label: string }>) => {
+  const handleNodeClick = (_: any, node: Node<StepNodeData>) => {
     setSelectedNodeId(node.id);
   };
 
-  useEffect(() => {
-    const { nodes, edges } = adaptFlowToReactFlow(flowGraph);
-    setNodes(nodes);
-    setEdges(edges);
-  }, [flowGraph]);
+  // node/edge updates are derived directly from `flowGraph`
 
   (globalThis as any).__FLOW_HANDLE__ = handleAIResponse;
 
@@ -176,14 +177,14 @@ export default function ArchitectureCanvas() {
       </div>
 
       {/* Canvas */}
-      <div className="flex-1 relative min-h-0 rounded-lg overflow-hidden">
+      <div className="flex-1 min-h-0 rounded-lg overflow-hidden">
         <ReactFlow
           nodes={nodes}
           edges={edges}
           fitView
           className="text-black"
           nodesDraggable={true}
-          nodesConnectable={false}
+          nodesConnectable={true}
           panOnDrag={true}
           zoomOnScroll={true}
           zoomOnPinch={true}
@@ -192,13 +193,17 @@ export default function ArchitectureCanvas() {
           elementsSelectable
           proOptions={{ hideAttribution: true }}
           nodeTypes={{ step: StepNode }}
-          onNodesChange={onNodesChange}
           onNodeClick={handleNodeClick}
           onPaneClick={() => setSelectedNodeId(null)}
           deleteKeyCode={["Backspace", "Delete"]}
+          onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           connectionMode={ConnectionMode.Loose}
+          defaultEdgeOptions={{
+            animated: true,
+            style: { stroke: "red" },
+          }}
         >
           <Background
             variant={BackgroundVariant.Dots}
@@ -212,23 +217,10 @@ export default function ArchitectureCanvas() {
 
         {/* each Node sidebar */}
         {selectedNode && (
-          <div className="absolute top-0 right-0 h-full w-80 bg-[#121212] border-l border-white/10 z-20">
-            <div className="p-4 flex items-center justify-between border-b border-white/10">
-              <h3 className="text-sm font-semibold text-white">
-                {selectedNode.label}
-              </h3>
-              <button
-                onClick={() => setSelectedNodeId(null)}
-                className="text-muted-foreground hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="p-4 text-sm text-white/80 space-y-4">
-              <p>{selectedNode.description}</p>
-            </div>
-          </div>
+          <FlowCardBar
+            node={selectedNode}
+            onClose={() => setSelectedNodeId(null)}
+          />
         )}
 
         {isEmpty && (

@@ -20,3 +20,14 @@ const App = () => {
 };
 
 export default App;
+
+// tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      animation: {
+        "spin-slow": "spin 3s linear infinite",
+      },
+    },
+  },
+};
