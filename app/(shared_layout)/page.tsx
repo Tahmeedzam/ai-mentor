@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { validateFlow } from "@/lib/flow/validation/validateFlow";
 import { simpleAppFlow } from "@/lib/flow/dummy/flow.template";
+import { getFlowIssues } from "@/lib/flow/validation/getFlowIssue";
 
 const PlayfairDisplay600 = Playfair_Display({
   subsets: ["latin"],
@@ -20,7 +21,9 @@ const PlayfairDisplay400 = Playfair_Display({
 });
 
 const validated = validateFlow(simpleAppFlow);
-console.log(validated.nodes);
+// console.log(validated.nodes);
+const flowIssues = getFlowIssues(validated);
+// console.log(flowIssues);
 
 export default function Home() {
   const [nodes, setNodes] = useState<Node[]>([]);

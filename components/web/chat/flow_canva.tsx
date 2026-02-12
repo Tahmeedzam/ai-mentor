@@ -13,7 +13,7 @@ import {
   OnEdgesChange,
   ConnectionMode,
 } from "@xyflow/react";
-import { Boxes, MousePointer2 } from "lucide-react";
+import { Boxes, MousePointer2, Plus } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import type { FlowResponse } from "@/lib/flow/flowSchema";
@@ -25,6 +25,9 @@ import { simpleAppFlow } from "@/lib/flow/dummy/flow.template";
 import { adaptFlowToReactFlow } from "@/lib/flow/adapters/reactflow.adapter";
 import { FlowGraph } from "@/lib/flow/types";
 import type { Connection, OnConnect } from "@xyflow/react";
+import { Button } from "@/components/ui/button";
+import { validateFlow } from "@/lib/flow/validation/validateFlow";
+import { getFlowIssues } from "@/lib/flow/validation/getFlowIssue";
 
 type StepNodeData = {
   label: string;
@@ -42,6 +45,10 @@ export default function ArchitectureCanvas() {
   const isEmpty = nodes.length === 0;
   const router = useRouter();
   const selectedNode = selectedNodeId ? dummyNodeMap[selectedNodeId] : null;
+  const validated = validateFlow(simpleAppFlow);
+  // console.log(validated.nodes);
+  const flowIssues = getFlowIssues(validated);
+  // console.log(flowIssues);
 
   const handleAIResponse = (data: FlowResponse) => {
     const newNodes: Node<StepNodeData>[] = data.steps.map((step, index) => ({
@@ -93,34 +100,34 @@ export default function ArchitectureCanvas() {
   };
 
   // Only for dummy data
-  const buildFlowFromDummy = (): {
-    nodes: Node<{ label: string }>[];
-    edges: Edge[];
-  } => {
-    const nodes: Node<{ label: string }>[] = [];
-    const edges: Edge[] = [];
-    const order = ["user", "frontend", "ai"]; // 👈 layout order
+  // const buildFlowFromDummy = (): {
+  //   nodes: Node<{ label: string }>[];
+  //   edges: Edge[];
+  // } => {
+  //   const nodes: Node<{ label: string }>[] = [];
+  //   const edges: Edge[] = [];
+  //   const order = ["user", "frontend", "ai"]; // 👈 layout order
 
-    order.forEach((id, index) => {
-      const node = dummyNodeMap[id];
-      nodes.push({
-        id: node.id,
-        type: "step",
-        data: { label: node.label },
-        position: { x: index * 250, y: 100 },
-      });
+  //   order.forEach((id, index) => {
+  //     const node = dummyNodeMap[id];
+  //     nodes.push({
+  //       id: node.id,
+  //       type: "step",
+  //       data: { label: node.label },
+  //       position: { x: index * 250, y: 100 },
+  //     });
 
-      if (index > 0) {
-        edges.push({
-          id: `e-${order[index - 1]}-${id}`,
-          source: order[index - 1],
-          target: id,
-        });
-      }
-    });
+  //     if (index > 0) {
+  //       edges.push({
+  //         id: `e-${order[index - 1]}-${id}`,
+  //         source: order[index - 1],
+  //         target: id,
+  //       });
+  //     }
+  //   });
 
-    return { nodes, edges };
-  };
+  //   return { nodes, edges };
+  // };
 
   const handleNodeClick = (_: any, node: Node<{ label: string }>) => {
     setSelectedNodeId(node.id);
@@ -151,9 +158,20 @@ export default function ArchitectureCanvas() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full">
-          <MousePointer2 className="w-3.5 h-3.5" />
-          <span>Interactive</span>
+        <div>
+          <Button>
+            <Plus />
+          </Button>
+          <button
+            onClick={() =>
+              setFlowGraph((prev) => ({
+                ...prev,
+                nodes: prev.nodes.filter((n) => n.id !== "database"),
+              }))
+            }
+          >
+            Remove Database
+          </button>
         </div>
       </div>
 
