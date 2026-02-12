@@ -26,20 +26,25 @@ import { adaptFlowToReactFlow } from "@/lib/flow/adapters/reactflow.adapter";
 import { FlowGraph } from "@/lib/flow/types";
 import type { Connection, OnConnect } from "@xyflow/react";
 import FlowCardBar from "../flow/flowCardBar";
+import { validateFlow } from "@/lib/flow/validation/validateFlow";
+import { getFlowIssues } from "@/lib/flow/validation/getFlowIssues";
 
 type StepNodeData = {
   label: string;
 };
 
 export default function ArchitectureCanvas() {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<StepNodeData>>(
-    [],
-  );
-  const [edges, setEdges] = useEdgesState<Edge>([]);
+  // const [nodes, setNodes, onNodesChange] = useNodesState<Node<StepNodeData>>(
+  //   [],
+  // );
+  // const [edges, setEdges] = useEdgesState<Edge>([]);
   const [flowGraph, setFlowGraph] = useState<FlowGraph>(simpleAppFlow);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const { chatid } = useParams<{ chatid: string }>();
   const { theme } = useTheme();
+  const validatedFlow = validateFlow(flowGraph);
+  const flowIssues = getFlowIssues(validatedFlow);
+  const { nodes, edges } = adaptFlowToReactFlow(validatedFlow);
   const isEmpty = nodes.length === 0;
   const router = useRouter();
   const selectedNode = selectedNodeId ? dummyNodeMap[selectedNodeId] : null;
@@ -59,8 +64,8 @@ export default function ArchitectureCanvas() {
       animated: true,
     }));
 
-    setNodes(newNodes);
-    setEdges(newEdges);
+    // setNodes(newNodes);
+    // setEdges(newEdges);
   };
 
   const onEdgesChange: OnEdgesChange = (changes) => {
@@ -129,8 +134,8 @@ export default function ArchitectureCanvas() {
 
   useEffect(() => {
     const { nodes, edges } = adaptFlowToReactFlow(flowGraph);
-    setNodes(nodes);
-    setEdges(edges);
+    // setNodes(nodes);
+    // setEdges(edges);
   }, [flowGraph]);
 
   (globalThis as any).__FLOW_HANDLE__ = handleAIResponse;
@@ -157,6 +162,16 @@ export default function ArchitectureCanvas() {
           <span>Interactive</span>
         </div>
       </div>
+      <button
+        onClick={() =>
+          setFlowGraph((prev) => ({
+            ...prev,
+            nodes: prev.nodes.filter((n) => n.id !== "database"),
+          }))
+        }
+      >
+        Remove Database
+      </button>
 
       {/* Canvas */}
       <div className="flex-1 relative min-h-0 rounded-lg overflow-hidden">
@@ -166,7 +181,7 @@ export default function ArchitectureCanvas() {
           fitView
           className="text-black"
           nodesDraggable={true}
-          nodesConnectable={false}
+          nodesConnectable={true}
           panOnDrag={true}
           zoomOnScroll={true}
           zoomOnPinch={true}
@@ -175,7 +190,6 @@ export default function ArchitectureCanvas() {
           elementsSelectable
           proOptions={{ hideAttribution: true }}
           nodeTypes={{ step: StepNode }}
-          onNodesChange={onNodesChange}
           onNodeClick={handleNodeClick}
           onPaneClick={() => setSelectedNodeId(null)}
           deleteKeyCode={["Backspace", "Delete"]}
