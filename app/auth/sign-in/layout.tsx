@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "@/app/globals.css";
+import NavBar from "@/components/web/loginNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +48,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#121212]`}
       >
         <ThemeProvider attribute="class" enableSystem defaultTheme="dark">
+          {/* NavBar  */}
+          <NavBar />
           {children}
         </ThemeProvider>
       </body>
