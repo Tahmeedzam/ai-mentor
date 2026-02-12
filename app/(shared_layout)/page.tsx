@@ -7,6 +7,8 @@ import { Playfair_Display } from "next/font/google";
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { validateFlow } from "@/lib/flow/validation/validateFlow";
+import { simpleAppFlow } from "@/lib/flow/dummy/flow.template";
 
 const PlayfairDisplay600 = Playfair_Display({
   subsets: ["latin"],
@@ -16,6 +18,9 @@ const PlayfairDisplay400 = Playfair_Display({
   subsets: ["cyrillic"],
   weight: "400",
 });
+
+const validated = validateFlow(simpleAppFlow);
+console.log(validated.nodes);
 
 export default function Home() {
   const [nodes, setNodes] = useState<Node[]>([]);

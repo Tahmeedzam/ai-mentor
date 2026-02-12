@@ -38,7 +38,7 @@ export const simpleAppFlow: FlowGraph = {
       description: "Web UI layer",
 
       provides: ["frontend"],
-      requires: ["user"],
+      requires: ["user", "database"],
       optionalRequires: ["auth"],
 
       checklist: [
