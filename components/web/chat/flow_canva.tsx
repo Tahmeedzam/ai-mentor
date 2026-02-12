@@ -25,6 +25,7 @@ import { simpleAppFlow } from "@/lib/flow/dummy/flow.template";
 import { adaptFlowToReactFlow } from "@/lib/flow/adapters/reactflow.adapter";
 import { FlowGraph } from "@/lib/flow/types";
 import type { Connection, OnConnect } from "@xyflow/react";
+import FlowCardBar from "../flow/flowCardBar";
 
 type StepNodeData = {
   label: string;
@@ -194,23 +195,10 @@ export default function ArchitectureCanvas() {
 
         {/* each Node sidebar */}
         {selectedNode && (
-          <div className="absolute top-0 right-0 h-full w-80 bg-[#121212] border-l border-white/10 z-20">
-            <div className="p-4 flex items-center justify-between border-b border-white/10">
-              <h3 className="text-sm font-semibold text-white">
-                {selectedNode.label}
-              </h3>
-              <button
-                onClick={() => setSelectedNodeId(null)}
-                className="text-muted-foreground hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="p-4 text-sm text-white/80 space-y-4">
-              <p>{selectedNode.description}</p>
-            </div>
-          </div>
+          <FlowCardBar
+            node={selectedNode}
+            onClose={() => setSelectedNodeId(null)}
+          />
         )}
 
         {isEmpty && (
