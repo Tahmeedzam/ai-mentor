@@ -17,7 +17,7 @@ import {
 import type { Node, Edge } from "@xyflow/react";
 import { Boxes, MousePointer2, Plus } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { FlowResponse } from "@/lib/flow/flowSchema";
 import StepNode from "@/components/web/flow/stepNode";
 // import { overviewFlow, roadmapFlow } from "@/data/dummyFlows";
@@ -31,22 +31,61 @@ import FlowCardBar from "../flow/flowCardBar";
 import { validateFlow } from "@/lib/flow/validation/validateFlow";
 import { Button } from "@/components/ui/button";
 import { FlowNode } from "@/lib/flow/schema/node.schema";
+import { getFlowIssues } from "@/lib/flow/validation/getFlowIssue";
 
 type StepNodeData = FlowGraph["nodes"][number];
 
 export default function ArchitectureCanvas() {
+  // ============ STATE ============
   const [flowGraph, setFlowGraph] = useState<FlowGraph>(simpleAppFlow);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [validatedFlow, setValidatedFlow] = useState<FlowGraph>(
+    validateFlow(simpleAppFlow),
+  );
+  const [flowIssues, setFlowIssues] = useState(
+    getFlowIssues(validateFlow(simpleAppFlow)),
+  );
+
+  // Track if we're syncing from validatedFlow to prevent loops
+  const isSyncingFromValidatedFlow = useRef(false);
+
+  // console.log(validatedFlow.nodes);
+  // console.log(flowIssues);
+
+  // ============ CONTEXT ============
   const { chatid } = useParams<{ chatid: string }>();
   const { theme } = useTheme();
-  // const validatedFlow = validateFlow(flowGraph);
-  // const flowIssues = getFlowIssues(validatedFlow);
-  const { nodes: adaptedNodes, edges: adaptedEdges } =
-    adaptFlowToReactFlow(flowGraph);
 
+  // ============ ADAPT TO REACT FLOW ============
+  const { nodes: adaptedNodes, edges: adaptedEdges } =
+    adaptFlowToReactFlow(validatedFlow);
   const [nodes, setNodes, rfOnNodesChange] = useNodesState(adaptedNodes);
   const [edges, setEdges, rfOnEdgesChange] = useEdgesState(adaptedEdges);
 
+  // ============ VALIDATION EFFECTS ============
+  // Step 1: Whenever flowGraph changes, re-validate it
+  useEffect(() => {
+    console.log("flowGraph changed, validating...");
+    const validated = validateFlow(flowGraph);
+    setValidatedFlow(validated);
+    setFlowIssues(getFlowIssues(validated));
+  }, [flowGraph]);
+
+  // Step 2: Whenever validatedFlow changes, update nodes and edges
+  useEffect(() => {
+    console.log("validatedFlow changed, updating nodes/edges...");
+    isSyncingFromValidatedFlow.current = true;
+    const { nodes: newNodes, edges: newEdges } =
+      adaptFlowToReactFlow(validatedFlow);
+    setNodes(newNodes);
+    setEdges(newEdges);
+    // Reset flag after a tick
+    setTimeout(() => {
+      isSyncingFromValidatedFlow.current = false;
+    }, 0);
+  }, [validatedFlow]);
+
+  // ============ HELPERS ============
   const isEmpty = nodes.length === 0;
   const selectedNode = selectedNodeId ? dummyNodeMap[selectedNodeId] : null;
 
@@ -74,18 +113,30 @@ export default function ArchitectureCanvas() {
 
   // Handle node changes (position, removal) via React Flow helpers
   const onNodesChange: OnNodesChange = (changes) => {
+    // If we're currently syncing from validatedFlow, don't sync back to avoid loop
+    if (isSyncingFromValidatedFlow.current) {
+      setNodes((nds) => applyNodeChanges(changes, nds) as Node<FlowNode>[]);
+      return;
+    }
+
+    // Apply changes and sync back to flowGraph
     setNodes((nds) => {
       const updated = applyNodeChanges(changes, nds) as Node<FlowNode>[];
 
-      // sync back to flowGraph: take each RF node's `data` (the full FlowNode)
-      // and update its `position` from the RF node
-      setFlowGraph((prev) => ({
-        ...prev,
-        nodes: updated.map((n) => ({
-          ...(n.data as any),
-          position: n.position,
-        })),
-      }));
+      // Only sync meaningful changes (position, remove)
+      const hasMeaningfulChanges = changes.some(
+        (c) => c.type === "position" || c.type === "remove",
+      );
+
+      if (hasMeaningfulChanges) {
+        setFlowGraph((prev) => ({
+          ...prev,
+          nodes: updated.map((n) => ({
+            ...(n.data as any),
+            position: n.position,
+          })),
+        }));
+      }
 
       return updated;
     });

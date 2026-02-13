@@ -29,15 +29,13 @@ export default function RootLayout({
   modal: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-row`}
-      >
-        <ThemeProvider attribute="class" enableSystem defaultTheme="dark">
-          {children}
-          {modal}
-        </ThemeProvider>
-      </body>
-    </html>
+    <body
+      className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-row`}
+    >
+      <ThemeProvider attribute="class" enableSystem defaultTheme="dark">
+        {children}
+        {modal}
+      </ThemeProvider>
+    </body>
   );
 }
