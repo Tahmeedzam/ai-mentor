@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Playfair_Display, Libre_Baskerville } from "next/font/google";
-import GooeyNav from "@/components/GooeyNav";
+import GooeyNav from "@/components/ui/GooeyNav";
 import { Button } from "../ui/button";
 
 const PlayfairDisplay600 = Playfair_Display({

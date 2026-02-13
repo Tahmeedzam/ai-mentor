@@ -15,6 +15,13 @@ export default function StepNode({
   return (
     <div className="group relative cursor-grab active:cursor-grabbing">
       {/* Glow */}
+      {isError && data.issues.length > 0 && (
+        <div className="absolute top-full mt-2 left-5 bg-red-600 text-white text-xs p-2 rounded shadow-lg z-50">
+          {data.issues.map((issue) => (
+            <div key={issue.id}>{issue.message}</div>
+          ))}
+        </div>
+      )}
       <div
         className={`absolute -inset-4 rounded-[2rem] blur-3xl transition-all duration-1000 pointer-events-none ${
           isError
@@ -39,7 +46,7 @@ export default function StepNode({
                 : "border-white/10"
           }
           ${selected ? "ring-2 ring-primary" : ""}
-        `}
+          `}
       >
         {/* Shimmer */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -63,7 +70,6 @@ export default function StepNode({
           <p className="text-[11px] text-white/40 leading-relaxed mb-4 line-clamp-2 font-medium">
             {data.description}
           </p>
-
           {/* Status indicator */}
           {data.status !== "ok" && (
             <div className="absolute top-2 right-2">

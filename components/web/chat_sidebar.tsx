@@ -33,7 +33,7 @@ export default function NavigationBar() {
     ${isOpen ? "w-[18%]" : "w-[3%]"}
     flex flex-col justify-between
     ${isOpen ? "items-start" : "items-center"}
-    dark:bg-[#1A1A1A] bg-white
+    ${theme === "light" ? "bg-[#ffffff]" : "bg-[#1A1A1A]"}
     transition-all duration-300
     py-5
     border-r-2 border-[#2E2E2E]
