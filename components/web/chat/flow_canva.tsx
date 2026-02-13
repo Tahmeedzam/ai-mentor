@@ -42,9 +42,7 @@ export default function ArchitectureCanvas() {
   const [validatedFlow, setValidatedFlow] = useState<FlowGraph>(
     validateFlow(simpleAppFlow),
   );
-  const [flowIssues, setFlowIssues] = useState(
-    getFlowIssues(validateFlow(simpleAppFlow)),
-  );
+  const flowIssues = getFlowIssues(validatedFlow);
 
   // Track if we're syncing from validatedFlow to prevent loops
   const isSyncingFromValidatedFlow = useRef(false);
@@ -68,7 +66,7 @@ export default function ArchitectureCanvas() {
     console.log("flowGraph changed, validating...");
     const validated = validateFlow(flowGraph);
     setValidatedFlow(validated);
-    setFlowIssues(getFlowIssues(validated));
+    // setFlowIssues(getFlowIssues(validated));
   }, [flowGraph]);
 
   // Step 2: Whenever validatedFlow changes, update nodes and edges
@@ -225,6 +223,19 @@ export default function ArchitectureCanvas() {
             Remove Database
           </button>
         </div>
+
+        {/* {flowIssues.length > 0 ? (
+          <div className="absolute bottom-4 right-4 bg-black/80 text-white p-4 rounded-xl w-80">
+            <h4 className="font-bold mb-2">Flow Issues</h4>
+            {flowIssues.map((issue) => (
+              <div key={issue.message} className="text-sm mb-1">
+                ❌ {issue.message}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div>NO ERROR</div>
+        )} */}
       </div>
 
       {/* Canvas */}
@@ -256,6 +267,16 @@ export default function ArchitectureCanvas() {
             style: { stroke: "red" },
           }}
         >
+          {flowIssues.length > 0 && (
+            <div className="absolute bottom-4 right-4 bg-black/80 text-white p-4 rounded-xl w-80">
+              <h4 className="font-bold mb-2">Flow Issues</h4>
+              {flowIssues.map((issue) => (
+                <div key={issue.message} className="text-sm mb-1">
+                  ❌ {issue.message}
+                </div>
+              ))}
+            </div>
+          )}
           <Background
             variant={BackgroundVariant.Dots}
             gap={20}
