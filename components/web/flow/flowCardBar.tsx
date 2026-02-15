@@ -1,6 +1,7 @@
 "use client";
 
 import { DummyNode } from "@/data/dummyFlows";
+import type { FlowGraph } from "@/lib/flow/types";
 import {
   X,
   Activity,
@@ -13,8 +14,10 @@ import {
   Beaker,
 } from "lucide-react";
 
+type FlowNode = FlowGraph["nodes"][number];
+
 interface FlowCardBarProps {
-  node: DummyNode;
+  node: FlowNode;
   onClose: () => void;
 }
 
@@ -27,19 +30,14 @@ const THEME_COLORS = {
 };
 
 export default function FlowCardBar({ node, onClose }: FlowCardBarProps) {
-  const accentColor =
-    THEME_COLORS[node.color as keyof typeof THEME_COLORS] ||
-    THEME_COLORS.purple;
+  // const accentColor =
+  //   THEME_COLORS[node.color as keyof typeof THEME_COLORS] ||
+  //   THEME_COLORS.purple;
 
   return (
     <div className="absolute top-0 right-0 h-full w-96 bg-[#0A0A0B]/95 backdrop-blur-2xl border-l border-white/10 z-50 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] animate-in slide-in-from-right duration-300 flex flex-col">
       {/* Top Line */}
-      <div
-        className="absolute top-0 left-0 w-full h-[1px]"
-        style={{
-          background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
-        }}
-      />
+      <div className="absolute top-0 left-0 w-full h-[1px]" />
 
       {/* 1. HEADER */}
       <div className="p-6 flex items-start justify-between border-b border-white/5 bg-white/1">
@@ -47,7 +45,7 @@ export default function FlowCardBar({ node, onClose }: FlowCardBarProps) {
           <div className="flex items-center gap-2 mb-1">
             <span
               className="text-[10px] font-black px-2 py-0.5 rounded border border-white/10 bg-white/5 uppercase tracking-widest"
-              style={{ color: accentColor }}
+              // style={{ color: accentColor }}
             >
               {node.id} {/* Node ID */}
             </span>
@@ -56,7 +54,7 @@ export default function FlowCardBar({ node, onClose }: FlowCardBarProps) {
             </span>
           </div>
           <h3 className="text-xl font-black text-white tracking-tight leading-tight">
-            {node.label}
+            {node.title}
           </h3>
         </div>
         <button
@@ -102,6 +100,58 @@ export default function FlowCardBar({ node, onClose }: FlowCardBarProps) {
           </div>
         </section>
 
+        {/* CAPABILITIES */}
+        <section className="space-y-3">
+          <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">
+            Capabilities
+          </label>
+
+          <div className="space-y-2 text-xs">
+            <div>
+              <span className="text-white/40">Provides:</span>{" "}
+              {node.provides.length > 0 ? node.provides.join(", ") : "—"}
+            </div>
+
+            <div>
+              <span className="text-white/40">Requires:</span>{" "}
+              {node.requires.map((req) => {
+                const isMissing = node.issues.some(
+                  (i) => i.relatedCapability === req,
+                );
+
+                return (
+                  <span
+                    key={req}
+                    className={isMissing ? "text-red-400 font-semibold" : ""}
+                  >
+                    {req}{" "}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ISSUES */}
+        {node.issues.length > 0 && (
+          <section className="space-y-3">
+            <label className="text-[10px] font-bold text-red-400 uppercase tracking-[0.2em]">
+              Issues
+            </label>
+
+            <div className="space-y-2 text-xs">
+              {node.issues.map((issue) => (
+                <div
+                  key={issue.id}
+                  className="p-2 rounded bg-red-500/10 border border-red-500/20"
+                >
+                  {issue.message}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* PERFORMANCE  */}
         <section className="space-y-3">
           <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] flex items-center gap-2">
@@ -114,14 +164,14 @@ export default function FlowCardBar({ node, onClose }: FlowCardBarProps) {
               </span>
               <span className="text-sm font-mono text-emerald-500">24ms</span>
             </div>
-            <div className="bg-white/2 border border-white/5 p-3 rounded-lg">
+            {/* <div className="bg-white/2 border border-white/5 p-3 rounded-lg">
               <span className="block text-[8px] text-white/20 uppercase font-bold mb-1">
                 Load
               </span>
               <span className="text-sm font-mono text-blue-400">
                 {node.progress}%
               </span>
-            </div>
+            </div> */}
           </div>
         </section>
 

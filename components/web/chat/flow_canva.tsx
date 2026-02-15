@@ -85,7 +85,9 @@ export default function ArchitectureCanvas() {
 
   // ============ HELPERS ============
   const isEmpty = nodes.length === 0;
-  const selectedNode = selectedNodeId ? dummyNodeMap[selectedNodeId] : null;
+  const selectedNode = selectedNodeId
+    ? (validatedFlow.nodes.find((n) => n.id === selectedNodeId) ?? null)
+    : null;
 
   const handleAIResponse = (data: FlowResponse) => {
     // AI responses contain a simplified `FlowStep` shape (id + label).
@@ -109,6 +111,31 @@ export default function ArchitectureCanvas() {
     // setEdges(newEdges);
   };
 
+  const addNewNode = () => {
+    const newId = `node-${Date.now()}`;
+
+    const newNode: FlowNode = {
+      id: newId,
+      type: "process",
+      title: "New Node",
+      description: "Custom node",
+      provides: [],
+      requires: [],
+      optionalRequires: [],
+      checklist: [],
+      status: "ok",
+      issues: [],
+      position: { x: 300, y: 200 },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      version: 1,
+    };
+
+    setFlowGraph((prev) => ({
+      ...prev,
+      nodes: [...prev.nodes, newNode],
+    }));
+  };
   // Handle node changes (position, removal) via React Flow helpers
   const onNodesChange: OnNodesChange = (changes) => {
     // If we're currently syncing from validatedFlow, don't sync back to avoid loop
@@ -209,33 +236,10 @@ export default function ArchitectureCanvas() {
           </div>
         </div>
         <div>
-          <Button>
+          <Button onClick={addNewNode}>
             <Plus />
           </Button>
-          <button
-            onClick={() =>
-              setFlowGraph((prev) => ({
-                ...prev,
-                nodes: prev.nodes.filter((n) => n.id !== "database"),
-              }))
-            }
-          >
-            Remove Database
-          </button>
         </div>
-
-        {/* {flowIssues.length > 0 ? (
-          <div className="absolute bottom-4 right-4 bg-black/80 text-white p-4 rounded-xl w-80">
-            <h4 className="font-bold mb-2">Flow Issues</h4>
-            {flowIssues.map((issue) => (
-              <div key={issue.message} className="text-sm mb-1">
-                ❌ {issue.message}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div>NO ERROR</div>
-        )} */}
       </div>
 
       {/* Canvas */}
