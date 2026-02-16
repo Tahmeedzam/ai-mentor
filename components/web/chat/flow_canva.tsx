@@ -171,15 +171,17 @@ export default function ArchitectureCanvas() {
     setEdges((eds) => {
       const updated = applyEdgeChanges(changes, eds);
 
-      setFlowGraph((prev) => ({
-        ...prev,
-        edges: updated.map((e) => ({
-          id: e.id,
-          source: e.source,
-          target: e.target,
-          type: (e as any).type || "required",
-        })),
-      }));
+      // If any edge was removed, sync flowGraph
+      const removedIds = changes
+        .filter((c) => c.type === "remove")
+        .map((c) => c.id);
+
+      if (removedIds.length > 0) {
+        setFlowGraph((prev) => ({
+          ...prev,
+          edges: prev.edges.filter((e) => !removedIds.includes(e.id)),
+        }));
+      }
 
       return updated;
     });
@@ -192,6 +194,7 @@ export default function ArchitectureCanvas() {
       id: `e-${connection.source}-${connection.target}-${Date.now()}`,
       source: connection.source,
       target: connection.target,
+      type: "custom",
     };
 
     setEdges((eds) => [...eds, newEdge]);
@@ -268,7 +271,14 @@ export default function ArchitectureCanvas() {
           connectionMode={ConnectionMode.Loose}
           defaultEdgeOptions={{
             animated: true,
-            style: { stroke: "red" },
+            interactionWidth: 20,
+            style: {
+              stroke: "red",
+              strokeWidth: 2,
+              strokeDasharray: "6 6",
+              animation: "dashMove 1s linear infinite",
+              cursor: "pointer",
+            },
           }}
         >
           {flowIssues.length > 0 && (
@@ -296,6 +306,14 @@ export default function ArchitectureCanvas() {
           <FlowCardBar
             node={selectedNode}
             onClose={() => setSelectedNodeId(null)}
+            onUpdate={(updatedNode) => {
+              setFlowGraph((prev) => ({
+                ...prev,
+                nodes: prev.nodes.map((n) =>
+                  n.id === updatedNode.id ? updatedNode : n,
+                ),
+              }));
+            }}
           />
         )}
 

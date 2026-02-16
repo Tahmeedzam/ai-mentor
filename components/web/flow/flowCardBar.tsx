@@ -1,17 +1,17 @@
 "use client";
 
-import { DummyNode } from "@/data/dummyFlows";
+import { useState } from "react";
 import type { FlowGraph } from "@/lib/flow/types";
 import {
   X,
   Activity,
-  Zap,
-  Terminal,
   CheckCircle2,
   ArrowRight,
   Info,
   Layers,
   Beaker,
+  Pencil,
+  Save,
 } from "lucide-react";
 
 type FlowNode = FlowGraph["nodes"][number];
@@ -19,85 +19,110 @@ type FlowNode = FlowGraph["nodes"][number];
 interface FlowCardBarProps {
   node: FlowNode;
   onClose: () => void;
+  onUpdate: (node: FlowNode) => void;
 }
 
-const THEME_COLORS = {
-  purple: "#8B5CF6",
-  blue: "#0EA5E9",
-  emerald: "#10B981",
-  orange: "#F59E0B",
-  pink: "#F43F5E",
-};
+export default function FlowCardBar({
+  node,
+  onClose,
+  onUpdate,
+}: FlowCardBarProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState<FlowNode>(node);
 
-export default function FlowCardBar({ node, onClose }: FlowCardBarProps) {
-  // const accentColor =
-  //   THEME_COLORS[node.color as keyof typeof THEME_COLORS] ||
-  //   THEME_COLORS.purple;
+  // Sync draft when node changes
+  if (!isEditing && draft.id !== node.id) {
+    setDraft(node);
+  }
+
+  const handleSave = () => {
+    onUpdate({
+      ...draft,
+      updatedAt: new Date().toISOString(),
+    });
+    setIsEditing(false);
+  };
+
+  const updateField = (field: keyof FlowNode, value: any) => {
+    setDraft((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const parseArrayInput = (value: string) =>
+    value
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean);
 
   return (
-    <div className="absolute top-0 right-0 h-full w-96 bg-[#0A0A0B]/95 backdrop-blur-2xl border-l border-white/10 z-50 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] animate-in slide-in-from-right duration-300 flex flex-col">
-      {/* Top Line */}
-      <div className="absolute top-0 left-0 w-full h-[1px]" />
+    <div className="absolute top-0 right-0 h-full w-96 bg-[#0A0A0B]/95 backdrop-blur-2xl border-l border-white/10 z-50 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] flex flex-col">
+      {/* HEADER */}
+      <div className="p-6 flex items-start justify-between border-b border-white/5">
+        <div className="space-y-1 w-full">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-black px-2 py-0.5 rounded border border-white/10 bg-white/5 uppercase tracking-widest">
+              {node.id}
+            </span>
 
-      {/* 1. HEADER */}
-      <div className="p-6 flex items-start justify-between border-b border-white/5 bg-white/1">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span
-              className="text-[10px] font-black px-2 py-0.5 rounded border border-white/10 bg-white/5 uppercase tracking-widest"
-              // style={{ color: accentColor }}
-            >
-              {node.id} {/* Node ID */}
-            </span>
-            <span className="text-[10px] text-white/20 font-mono tracking-tighter">
-              v1.0.2
-            </span>
+            <div className="flex items-center gap-2">
+              {!isEditing ? (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="p-2 hover:bg-white/5 rounded text-white/50 hover:text-white"
+                >
+                  <Pencil size={16} />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSave}
+                  className="p-2 hover:bg-emerald-500/20 rounded text-emerald-400"
+                >
+                  <Save size={16} />
+                </button>
+              )}
+
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-white/5 rounded text-white/40 hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
-          <h3 className="text-xl font-black text-white tracking-tight leading-tight">
-            {node.title}
-          </h3>
+
+          {/* TITLE */}
+          {!isEditing ? (
+            <h3 className="text-xl font-black text-white">{node.title}</h3>
+          ) : (
+            <input
+              value={draft.title}
+              onChange={(e) => updateField("title", e.target.value)}
+              className="w-full bg-white/5 text-white p-2 rounded"
+            />
+          )}
         </div>
-        <button
-          onClick={onClose}
-          className="p-2 hover:bg-white/5 rounded-full transition-colors text-white/40 hover:text-white"
-        >
-          <X size={20} />
-        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-6 space-y-8">
         {/* DESCRIPTION */}
         <section className="space-y-3">
           <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] flex items-center gap-2">
             <Info size={14} /> Documentation
           </label>
-          <p className="text-sm text-white/70 leading-relaxed font-medium bg-white/2 p-3 rounded-lg border border-white/5">
-            {node.description}
-          </p>
-        </section>
 
-        {/*  CHECKLIST */}
-        <section className="space-y-4">
-          <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] flex items-center gap-2">
-            <CheckCircle2 size={14} /> Implementation Steps
-          </label>
-          <div className="space-y-2">
-            {[
-              "Initialize Schema",
-              "Connect WebSocket handshakes",
-              "Validate Data Integrity",
-            ].map((step, i) => (
-              <div
-                key={i}
-                className="group flex items-center justify-between p-3 rounded-lg bg-white/3 border border-white/5 hover:border-white/20 transition-all"
-              >
-                <span className="text-xs text-white/60">{step}</span>
-                <button className="opacity-0 group-hover:opacity-100 flex items-center gap-1 text-[9px] font-bold uppercase tracking-tighter text-white hover:underline transition-all">
-                  Details <ArrowRight size={10} />
-                </button>
-              </div>
-            ))}
-          </div>
+          {!isEditing ? (
+            <p className="text-sm text-white/70 bg-white/5 p-3 rounded">
+              {node.description}
+            </p>
+          ) : (
+            <textarea
+              value={draft.description}
+              onChange={(e) => updateField("description", e.target.value)}
+              className="w-full bg-white/5 text-white p-3 rounded"
+            />
+          )}
         </section>
 
         {/* CAPABILITIES */}
@@ -106,39 +131,68 @@ export default function FlowCardBar({ node, onClose }: FlowCardBarProps) {
             Capabilities
           </label>
 
-          <div className="space-y-2 text-xs">
+          <div className="space-y-3 text-xs">
+            {/* PROVIDES */}
             <div>
-              <span className="text-white/40">Provides:</span>{" "}
-              {node.provides.length > 0 ? node.provides.join(", ") : "—"}
+              <span className="text-white/40">Provides:</span>
+              {!isEditing ? (
+                <div className="mt-1 text-white">
+                  {node.provides.join(", ") || "—"}
+                </div>
+              ) : (
+                <input
+                  value={draft.provides.join(", ")}
+                  onChange={(e) =>
+                    updateField("provides", parseArrayInput(e.target.value))
+                  }
+                  placeholder="comma separated"
+                  className="w-full bg-white/5 text-white p-2 rounded mt-1"
+                />
+              )}
             </div>
 
+            {/* REQUIRES */}
             <div>
-              <span className="text-white/40">Requires:</span>{" "}
-              {node.requires.map((req) => {
-                const isMissing = node.issues.some(
-                  (i) => i.relatedCapability === req,
-                );
+              <span className="text-white/40">Requires:</span>
+              {!isEditing ? (
+                <div className="mt-1">
+                  {node.requires.map((req) => {
+                    const isMissing = node.issues.some(
+                      (i) => i.relatedCapability === req,
+                    );
 
-                return (
-                  <span
-                    key={req}
-                    className={isMissing ? "text-red-400 font-semibold" : ""}
-                  >
-                    {req}{" "}
-                  </span>
-                );
-              })}
+                    return (
+                      <span
+                        key={req}
+                        className={
+                          isMissing ? "text-red-400 font-semibold mr-1" : "mr-1"
+                        }
+                      >
+                        {req}
+                      </span>
+                    );
+                  })}
+                </div>
+              ) : (
+                <input
+                  value={draft.requires.join(", ")}
+                  onChange={(e) =>
+                    updateField("requires", parseArrayInput(e.target.value))
+                  }
+                  placeholder="comma separated"
+                  className="w-full bg-white/5 text-white p-2 rounded mt-1"
+                />
+              )}
             </div>
           </div>
         </section>
 
         {/* ISSUES */}
-        {node.issues.length > 0 && (
+        {node.issues.length > 0 && !isEditing && (
           <section className="space-y-3">
             <label className="text-[10px] font-bold text-red-400 uppercase tracking-[0.2em]">
               Issues
             </label>
-
             <div className="space-y-2 text-xs">
               {node.issues.map((issue) => (
                 <div
@@ -152,48 +206,21 @@ export default function FlowCardBar({ node, onClose }: FlowCardBarProps) {
           </section>
         )}
 
-        {/* PERFORMANCE  */}
+        {/* PERFORMANCE */}
         <section className="space-y-3">
           <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] flex items-center gap-2">
             <Activity size={14} /> Real-time Performance
           </label>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white/2 border border-white/5 p-3 rounded-lg">
-              <span className="block text-[8px] text-white/20 uppercase font-bold mb-1">
-                Latency
-              </span>
-              <span className="text-sm font-mono text-emerald-500">24ms</span>
-            </div>
-            {/* <div className="bg-white/2 border border-white/5 p-3 rounded-lg">
-              <span className="block text-[8px] text-white/20 uppercase font-bold mb-1">
-                Load
-              </span>
-              <span className="text-sm font-mono text-blue-400">
-                {node.progress}%
-              </span>
-            </div> */}
-          </div>
-        </section>
-
-        {/*  INPUT/OUTPUT SCHEMA  */}
-        <section className="space-y-3">
-          <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] flex items-center gap-2">
-            <Layers size={14} /> Schema Contract
-          </label>
-          <div className="bg-black/40 rounded border border-white/5 p-4 font-mono text-[10px] text-emerald-500/80">
-            <p className="text-white/20 mb-2">// Inbound Request</p>
-            <p>{"{"}</p>
-            <p className="pl-4">"action": "TRIGGER_PROCESS",</p>
-            <p className="pl-4">"origin": "{node.id}_edge"</p>
-            <p>{"}"}</p>
+          <div className="bg-white/5 p-3 rounded text-emerald-400 text-sm font-mono">
+            24ms
           </div>
         </section>
       </div>
 
-      {/* FOOTER ACTIONS */}
-      <div className="p-6 border-t border-white/5 bg-white/1 flex gap-3">
+      {/* FOOTER */}
+      <div className="p-6 border-t border-white/5 flex gap-3">
         <button className="flex-1 py-3 rounded-lg bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-white/90 transition-all active:scale-95">
-          Deploy Logic
+          Mark Completed
         </button>
         <button className="p-3 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all">
           <Beaker size={18} />

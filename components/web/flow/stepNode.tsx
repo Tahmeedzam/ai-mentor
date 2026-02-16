@@ -36,7 +36,7 @@ export default function StepNode({
       <div
         className={`
           relative min-w-64 bg-[#050506]
-          border rounded-xl overflow-hidden
+          border rounded-xl 
           transition-all duration-300
           ${
             isError
@@ -100,15 +100,33 @@ export default function StepNode({
         </div>
 
         {/* Handles */}
-        <Handle
-          type="target"
-          position={Position.Left}
-          className="!w-12 !h-[2px] !border-none !rounded-none !bg-white/20 hover:!bg-white/50 transition-colors"
-        />
+        {/* RIGHT - Source Handle */}
         <Handle
           type="source"
           position={Position.Right}
-          className="!w-12 !h-[2px] !border-none !rounded-none !bg-white/20 hover:!bg-white/50 transition-colors"
+          className="
+    !w-3 !h-3
+    !-right-1.5
+    !rounded-full
+    !bg-black
+    !border-2 !border-white
+    transition-all
+    hover:!scale-125
+    "
+        />
+        {/* LEFT - Target Handle */}
+        <Handle
+          type="target"
+          position={Position.Left}
+          className="
+    !w-3 !h-3
+    !-left-1.5
+    !rounded-full
+    !bg-white
+    !border-2 !border-black
+    transition-all
+    hover:!scale-125
+  "
         />
       </div>
     </div>
