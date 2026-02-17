@@ -37,7 +37,19 @@ type StepNodeData = FlowGraph["nodes"][number];
 
 export default function ArchitectureCanvas() {
   // ============ STATE ============
-  const [flowGraph, setFlowGraph] = useState<FlowGraph>(simpleAppFlow);
+  const [flowGraph, setFlowGraph] = useState<FlowGraph>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("kairos_flow");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to parse saved flow", e);
+        }
+      }
+    }
+    return simpleAppFlow;
+  });
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [validatedFlow, setValidatedFlow] = useState<FlowGraph>(
     validateFlow(simpleAppFlow),
@@ -82,6 +94,24 @@ export default function ArchitectureCanvas() {
       isSyncingFromValidatedFlow.current = false;
     }, 0);
   }, [validatedFlow]);
+
+  // Load local storage data
+  useEffect(() => {
+    localStorage.setItem("kairos_flow", JSON.stringify(flowGraph));
+  }, [flowGraph]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("kairos_flow");
+
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setFlowGraph(parsed);
+      } catch (err) {
+        console.error("Failed to parse saved flow", err);
+      }
+    }
+  }, []);
 
   // ============ HELPERS ============
   const isEmpty = nodes.length === 0;

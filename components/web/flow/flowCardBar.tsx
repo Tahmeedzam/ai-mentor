@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FlowGraph } from "@/lib/flow/types";
 import {
   X,
@@ -55,6 +55,16 @@ export default function FlowCardBar({
       .split(",")
       .map((v) => v.trim())
       .filter(Boolean);
+
+  useEffect(() => {
+    if (isEditing) {
+      const confirmSwitch = confirm("Discard unsaved changes?");
+      if (!confirmSwitch) return;
+    }
+
+    setIsEditing(false);
+    setDraft(node);
+  }, [node.id]);
 
   return (
     <div className="absolute top-0 right-0 h-full w-96 bg-[#0A0A0B]/95 backdrop-blur-2xl border-l border-white/10 z-50 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] flex flex-col">
