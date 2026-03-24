@@ -113,6 +113,57 @@ export default function ArchitectureCanvas() {
     }
   }, []);
 
+  // Load generated idea from search
+  useEffect(() => {
+    const generatedIdea = localStorage.getItem("generatedIdea");
+    if (generatedIdea) {
+      try {
+        const idea = JSON.parse(generatedIdea);
+        if (idea.steps && idea.connections) {
+          // Convert idea steps to flow graph nodes
+          const newNodes = idea.steps.map((step: any, index: number) => ({
+            id: step.id,
+            type: "process",
+            title: step.label,
+            description: idea.description || "",
+            provides: [],
+            requires: [],
+            optionalRequires: [],
+            checklist: [],
+            status: "ok" as const,
+            issues: [],
+            position: { x: index * 250, y: 100 },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            version: 1,
+          }));
+
+          const newEdges = idea.connections.map((conn: any) => ({
+            id: `e-${conn.from}-${conn.to}`,
+            source: conn.from,
+            target: conn.to,
+            type: "required" as const,
+          }));
+
+          setFlowGraph({
+            id: `flow-${Date.now()}`,
+            title: idea.title || "Generated Project",
+            description: idea.description || "",
+            nodes: newNodes,
+            edges: newEdges,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+
+          // Clear the generated idea after loading
+          localStorage.removeItem("generatedIdea");
+        }
+      } catch (err) {
+        console.error("Failed to load generated idea", err);
+      }
+    }
+  }, []);
+
   // ============ HELPERS ============
   const isEmpty = nodes.length === 0;
   const selectedNode = selectedNodeId
