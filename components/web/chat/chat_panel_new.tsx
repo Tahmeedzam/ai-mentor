@@ -43,9 +43,7 @@ export default function ChatPanelNew({
   const { theme, setTheme } = useTheme();
 
   async function handleSearch() {
-    if (!techStack && !time && !cost && !people) {
-      return;
-    }
+    if (!techStack && !time && !cost && !people) return;
 
     setIsSearching(true);
 
@@ -63,14 +61,20 @@ export default function ChatPanelNew({
 
       const data = await res.json();
 
-      if (data.ideas && data.ideas.length > 0) {
-        // Store the first idea's roadmap and navigate to chat
-        const idea = data.ideas[0];
-        localStorage.setItem("generatedIdea", JSON.stringify(idea));
-        router.push("/chat/1?mode=idea");
+      console.log("API RESPONSE:", data); // 🔥 DEBUG
+
+      if (data?.ideas?.length > 0) {
+        // ✅ store ALL ideas
+        localStorage.setItem("generatedIdeas", JSON.stringify(data.ideas));
+
+        router.push("/ideas");
+      } else {
+        console.error("No ideas returned", data);
+        alert("No ideas generated. Try again.");
       }
     } catch (error) {
       console.error("Error generating ideas:", error);
+      alert("Something went wrong.");
     } finally {
       setIsSearching(false);
     }

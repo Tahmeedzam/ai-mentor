@@ -26,12 +26,6 @@ Return EXACTLY this JSON schema:
       "estimatedTime": "string",
       "estimatedCost": "string",
       "teamSize": number,
-      "steps": [
-        { "id": "string", "label": "string" }
-      ],
-      "connections": [
-        { "from": "string", "to": "string" }
-      ]
     }
   ]
 }
@@ -46,27 +40,36 @@ Rules:
   - Time available: ${time || "any"}
   - Budget: ${cost || "any"}
   - Team size: ${people || "any"}
-- Each idea should include a roadmap with steps and connections
+- Each idea should be unique and scalable in future, not just any random idea.
 `;
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
+  const result = await model.generateContent({
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: {
+      responseMimeType: "application/json",
+    },
+  });
 
-  function extractJSON(text: string) {
-    const first = text.indexOf("{");
-    const last = text.lastIndexOf("}");
-    if (first === -1 || last === -1) return null;
-    return text.slice(first, last + 1);
+  const text = result.response.text();
+  console.log("RAW GEMINI OUTPUT:", text);
+
+  function cleanJson(text: string) {
+    return text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
   }
 
-  const jsonText = extractJSON(text);
-  if (!jsonText) {
+  let parsed;
+  try {
+    const cleaned = cleanJson(text);
+    parsed = JSON.parse(cleaned);
+  } catch (err) {
     return NextResponse.json(
-      { error: "No JSON found", raw: text },
+      { error: "Invalid JSON", raw: text },
       { status: 400 },
     );
   }
 
-  const parsed = JSON.parse(jsonText);
   return NextResponse.json(parsed);
 }
