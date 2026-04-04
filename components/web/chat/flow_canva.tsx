@@ -32,6 +32,9 @@ import { validateFlow } from "@/lib/flow/validation/validateFlow";
 import { Button } from "@/components/ui/button";
 import { FlowNode } from "@/lib/flow/schema/node.schema";
 import { getFlowIssues } from "@/lib/flow/validation/getFlowIssue";
+import { nodeColors } from "@/lib/flow/utils/nodeColours";
+import { detectNodeType } from "@/lib/flow/utils/detectNodeType";
+import ExportButton from "../flow/ExportButton";
 
 type StepNodeData = FlowGraph["nodes"][number];
 
@@ -121,22 +124,37 @@ export default function ArchitectureCanvas() {
         const idea = JSON.parse(generatedIdea);
         if (idea.steps && idea.connections) {
           // Convert idea steps to flow graph nodes
-          const newNodes = idea.steps.map((step: any, index: number) => ({
-            id: step.id,
-            type: "process",
-            title: step.label,
-            description: idea.description || "",
-            provides: [],
-            requires: [],
-            optionalRequires: [],
-            checklist: [],
-            status: "ok" as const,
-            issues: [],
-            position: { x: index * 250, y: 100 },
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            version: 1,
-          }));
+          const newNodes = idea.steps.map((step: any, index: number) => {
+            const type = detectNodeType(step.label);
+
+            return {
+              id: step.id,
+              type: "process",
+              title: step.label,
+              description: idea.description || "",
+              provides: [],
+              requires: [],
+              optionalRequires: [],
+              checklist: [],
+              status: "ok" as const,
+              issues: [],
+              position: {
+                x: (index % 2) * 350,
+                y: Math.floor(index / 2) * 180,
+              },
+              style: {
+                border: `2px solid ${nodeColors[type]}`,
+                background: `${nodeColors[type]}20`, // light shade
+              },
+              data: {
+                label: step.label,
+                nodeType: type,
+              },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              version: 1,
+            };
+          });
 
           const newEdges = idea.connections.map((conn: any) => ({
             id: `e-${conn.from}-${conn.to}`,
@@ -319,7 +337,8 @@ export default function ArchitectureCanvas() {
             </p>
           </div>
         </div>
-        <div>
+        <div className="flex gap-2">
+          <ExportButton containerId="flowchart-container" />
           <Button onClick={addNewNode}>
             <Plus />
           </Button>
@@ -327,7 +346,10 @@ export default function ArchitectureCanvas() {
       </div>
 
       {/* Canvas */}
-      <div className="flex-1 min-h-0 rounded-lg overflow-hidden">
+      <div
+        id="flowchart-container"
+        className="flex-1 min-h-0 rounded-lg overflow-hidden"
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}

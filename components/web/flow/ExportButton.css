@@ -1,0 +1,113 @@
+// Optional CSS Customizations for Export Button
+// Add these to your global styles or component CSS if you want to customize the appearance
+
+/* Export Button Styling */
+.export-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: hsl(217, 32.6%, 17.5%); // Match your dark theme
+  border: 1px solid hsl(217, 32.6%, 27.5%);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+}
+
+.export-button:hover {
+  background-color: hsl(217, 32.6%, 25%);
+  border-color: hsl(217, 32.6%, 35%);
+}
+
+.export-button:active {
+  transform: scale(0.98);
+}
+
+.export-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dropdown Menu Styling */
+.export-dropdown {
+  position: absolute;
+  right: 0;
+  margin-top: 0.5rem;
+  width: 160px;
+  background-color: hsl(217, 32.6%, 13%);
+  border: 1px solid hsl(217, 32.6%, 25%);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.export-dropdown button {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.export-dropdown button:hover {
+  background-color: hsl(217, 32.6%, 25%);
+}
+
+.export-dropdown button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading Spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Toast Notifications (via Sonner) */
+/* These are auto-styled but you can customize if needed */
+[data-sonner-toast] {
+  background-color: hsl(217, 32.6%, 13%);
+  border: 1px solid hsl(217, 32.6%, 25%);
+  color: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 0.875rem;
+}
+
+[data-sonner-toast][data-type="success"] {
+  background-color: hsl(142, 71%, 45%); // Green
+  border-color: hsl(142, 71%, 60%);
+}
+
+[data-sonner-toast][data-type="error"] {
+  background-color: hsl(0, 84%, 60%); // Red
+  border-color: hsl(0, 84%, 75%);
+}
